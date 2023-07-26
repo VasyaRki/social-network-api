@@ -10,6 +10,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.setGlobalPrefix('api');
+  app.enableCors({ origin: '*' });
 
   await app.listen(configService.getOrThrow('PORT'));
 }
