@@ -16,10 +16,7 @@ async function bootstrap() {
   app.use(
     '/graphql',
     cors<cors.CorsRequest>({
-      origin: [
-        'https://www.your-app.example',
-        'https://studio.apollographql.com',
-      ],
+      origin: '*',
     }),
   );
 
