@@ -13,13 +13,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors({ origin: '*', credentials: true });
 
-  app.use(
-    '/graphql',
-    cors<cors.CorsRequest>({
-      origin: '*',
-    }),
-  );
-
   await app.listen(configService.getOrThrow('PORT'));
 }
 
