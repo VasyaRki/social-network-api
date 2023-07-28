@@ -11,7 +11,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.setGlobalPrefix('api');
-  // app.enableCors({ origin: '*', credentials: true });
+  app.enableCors({ origin: '*', credentials: true });
 
   await app.listen(configService.getOrThrow('PORT'));
 }

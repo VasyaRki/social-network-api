@@ -12,7 +12,12 @@ import { PostModule } from './post/post.module';
 import { LikeModule } from './like/like.module';
 import { ChatModule } from './chat/chat.module';
 import { FollowModule } from './follow/follow.module';
+import { JwtTypes } from './jwt/enums/jwt-types.enum';
+import { JWT_CONSTANTS } from 'src/jwt/jwt.constants';
 import { CommentModule } from './comment/comment.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { JwtService } from './jwt/interfaces/jwt-service.interface';
+import { IJwtPayload } from './jwt/interfaces/jwt-payload.interface';
 
 @Module({
   imports: [
@@ -22,11 +27,29 @@ import { CommentModule } from './comment/comment.module';
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      imports: [],
-      useFactory: async () => ({
+      imports: [JwtModule],
+      inject: [JWT_CONSTANTS.APPLICATION.SERVICE_TOKEN],
+      useFactory: async (jwtService: JwtService) => ({
         autoSchemaFile: true,
         introspection: true,
         playground: true,
+        installSubscriptionHandlers: true,
+        subscriptions: {
+          'subscriptions-transport-ws': {
+            onConnect: (connectionParam) => {
+              const token = JwtAuthGuard.extractTokenFromAuthorizationHeaders(
+                connectionParam.Authorization,
+              );
+
+              const payload: IJwtPayload = jwtService.verify(
+                token,
+                JwtTypes.Access,
+              );
+
+              return payload;
+            },
+          },
+        },
       }),
     }),
     DbModule,
@@ -40,6 +63,6 @@ import { CommentModule } from './comment/comment.module';
     FollowModule,
     CommentModule,
   ],
-  providers: [ConfigService],
+  providers: [ConfigService, JwtModule],
 })
 export class AppModule {}
