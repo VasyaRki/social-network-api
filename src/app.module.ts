@@ -25,6 +25,8 @@ import { CommentModule } from './comment/comment.module';
       imports: [],
       useFactory: async () => ({
         autoSchemaFile: true,
+        introspection: true,
+        playground: true,
       }),
     }),
     DbModule,
