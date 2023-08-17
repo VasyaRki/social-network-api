@@ -26,6 +26,8 @@ import { IJwtPayload } from './jwt/interfaces/jwt-payload.interface';
       inject: [JWT_CONSTANTS.APPLICATION.SERVICE_TOKEN],
       useFactory: async (jwtService: JwtService) => ({
         autoSchemaFile: true,
+        introspection: true,
+        playground: true,
         installSubscriptionHandlers: true,
         subscriptions: {
           'subscriptions-transport-ws': {
