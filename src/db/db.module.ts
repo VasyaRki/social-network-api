@@ -1,13 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Tag } from 'src/tag/tag.entity';
 import { User } from '../user/user.entity';
-import { Post } from '../post/post.entity';
-import { Like } from '../like/like.entity';
-import { Follow } from '../follow/follow.entity';
-import { Comment } from '../comment/comment.entity';
-import { Message } from 'src/chat/message.entity';
 
 @Module({
   imports: [
@@ -21,7 +15,7 @@ import { Message } from 'src/chat/message.entity';
         username: configService.getOrThrow('DATABASE_USERNAME'),
         password: configService.getOrThrow('DATABASE_PASSWORD'),
         database: configService.getOrThrow('DATABASE_NAME'),
-        entities: [User, Post, Follow, Like, Comment, Message, Tag],
+        entities: [User],
         synchronize: true,
       }),
     }),

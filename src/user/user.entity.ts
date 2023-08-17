@@ -1,6 +1,5 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Post } from '../post/post.entity';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { Provider } from './enums/provider.enum';
 
 registerEnumType(Provider, {
@@ -30,16 +29,17 @@ export class User {
   @Column({ nullable: true })
   provider?: Provider;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
-  avatar: string;
+  avatar?: string;
 
-  @Column({ nullable: true })
-  socketId: string;
+  @Column({ default: false })
+  isEmailConfirmed: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @Column({ default: false })
+  isAccountPrivate: boolean;
 
   @Column({ nullable: true })
   refreshToken: string;
-
-  @OneToMany(() => Post, (posts) => posts.user)
-  posts: Post[];
 }

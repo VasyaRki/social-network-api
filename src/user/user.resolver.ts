@@ -5,9 +5,9 @@ import { UserService } from './user.service';
 import { GetUsersInput } from './inputs/get-users.input';
 import { UpdateUserInput } from './inputs/update-user.input';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { IJwtPayload } from 'src/jwt/interfaces/jwt-payload.interface';
+import { IJwtPayload } from '../jwt/interfaces/jwt-payload.interface';
 import { PaginatedUsersResponce } from './responses/paginated-users.response';
-import { IJwtPayloadDecorator } from 'src/jwt/decorators/jwt-payload.decorator';
+import { IJwtPayloadDecorator } from '../jwt/decorators/jwt-payload.decorator';
 
 @Resolver()
 export class UserResolver {
@@ -29,17 +29,23 @@ export class UserResolver {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Query(() => User)
+  public async profile(@IJwtPayloadDecorator() jwtPayload: IJwtPayload) {
+    return this.userService.getOne({ id: jwtPayload.id });
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => User)
-  public async updateUserById(
+  public async updateUser(
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
     @IJwtPayloadDecorator() jwtPayload: IJwtPayload,
   ): Promise<User> {
-    return this.userService.save({ id: jwtPayload.id, ...updateUserInput });
+    return this.userService.update(jwtPayload.id, updateUserInput);
   }
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Boolean)
-  public async deleteUserById(
+  public async deleteUser(
     @IJwtPayloadDecorator() jwtPayload: IJwtPayload,
   ): Promise<boolean> {
     return this.userService.delete(jwtPayload.id);

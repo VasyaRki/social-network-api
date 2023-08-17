@@ -6,13 +6,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthError } from '../errors/auth.error';
-import { JWT_CONSTANTS } from 'src/jwt/jwt.constants';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { DomainError } from 'src/common/domain.error';
-import { JwtTypes } from 'src/jwt/enums/jwt-types.enum';
-import { JwtService } from 'src/jwt/interfaces/jwt-service.interface';
-import { IJwtPayload } from 'src/jwt/interfaces/jwt-payload.interface';
+import { AuthError } from '../errors/auth.error';
+import { JWT_CONSTANTS } from '../../jwt/jwt.constants';
+import { DomainError } from '../../common/domain.error';
+import { JwtTypes } from '../../jwt/enums/jwt-types.enum';
+import { JwtService } from '../../jwt/interfaces/jwt-service.interface';
+import { IJwtPayload } from '../../jwt/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {

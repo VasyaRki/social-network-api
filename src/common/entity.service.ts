@@ -1,4 +1,10 @@
-import { Repository, DeepPartial, FindOptionsWhere, Entity } from 'typeorm';
+import {
+  ILike,
+  Entity,
+  Repository,
+  DeepPartial,
+  FindOptionsWhere,
+} from 'typeorm';
 import { PagedResult, PaginationQuery } from './types/pagination-query.type';
 
 export class EntityService<Entity> {
@@ -49,14 +55,28 @@ export class EntityService<Entity> {
   ): Promise<PagedResult<Entity>> {
     const page = query?.page || 1;
     const limit = query?.limit || 10;
+    const fields = query?.fields;
+    const search = query?.search;
 
-    const [data, total] = await this.repository.findAndCount({
-      where: filter,
-      relations,
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const where: FindOptionsWhere<Entity> = filter;
 
-    return { data, total };
+    try {
+      if (search && fields.length > 0) {
+        fields.map((field) => {
+          where[field] = ILike(`%${search}%`);
+        });
+      }
+
+      const [data, total] = await this.repository.findAndCount({
+        where,
+        relations,
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      return { data, total };
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }

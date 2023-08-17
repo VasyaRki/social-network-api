@@ -4,15 +4,17 @@ import axios from 'axios';
 import * as bcrypt from 'bcryptjs';
 import { AuthError } from './errors/auth.error';
 import { UserService } from '../user/user.service';
-import { JWT_CONSTANTS } from 'src/jwt/jwt.constants';
-import { JwtTypes } from 'src/jwt/enums/jwt-types.enum';
-import { Provider } from 'src/user/enums/provider.enum';
+import { JWT_CONSTANTS } from '../jwt/jwt.constants';
+import { JwtTypes } from '../jwt/enums/jwt-types.enum';
+import { Provider } from '../user/enums/provider.enum';
 import { AuthResponse } from './responses/auth.responce';
+import { CACHE_CONSTANTS } from '../cache/cache.constants';
 import { GoogleAuthInput } from './inputs/google-auth.input';
 import { ILoginUser } from './interfaces/login-user.interface';
 import { IRegisterUser } from './interfaces/register-user.interface';
-import { JwtService } from 'src/jwt/interfaces/jwt-service.interface';
-import { IJwtPayload } from 'src/jwt/interfaces/jwt-payload.interface';
+import { JwtService } from '../jwt/interfaces/jwt-service.interface';
+import { IJwtPayload } from '../jwt/interfaces/jwt-payload.interface';
+import { ICacheService } from '../cache/interfaces/cache-service.interface';
 
 @Injectable()
 export class AuthService {
@@ -21,10 +23,20 @@ export class AuthService {
     @Inject(JWT_CONSTANTS.APPLICATION.SERVICE_TOKEN)
     private jwtService: JwtService,
     private configService: ConfigService,
+    @Inject(CACHE_CONSTANTS.APPLICATION.SERVICE_TOKEN)
+    private readonly cacheService: ICacheService,
   ) {}
 
   public async validateUser(username: string, password: string): Promise<any> {
     const user = await this.userService.getOne({ email: username });
+
+    if (!user) {
+      throw AuthError.DoesNotExists();
+    }
+
+    if (!user.isEmailConfirmed) {
+      throw AuthError.EmailNotConfirmed();
+    }
 
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
@@ -66,14 +78,10 @@ export class AuthService {
     const user = await this.userService.create({
       ...userRegisterInput,
       password: hashedPassword,
+      isEmailConfirmed: true,
     });
 
     const jwtPair = this.jwtService.generatePair({ id: user.id });
-
-    this.userService.save({
-      id: user.id,
-      refreshToken: jwtPair.refreshToken,
-    });
 
     return {
       ...jwtPair,
