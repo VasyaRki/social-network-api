@@ -1,5 +1,7 @@
+import { UseGuards } from '@nestjs/common';
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
+import { SetAuthGuard } from './guards/set-auth.guard';
 import { AuthResponse } from './responses/auth.responce';
 import { UserLoginInput } from './inputs/login-user.input';
 import { UserRegistrationInput } from './inputs/register-user.input';
@@ -8,6 +10,7 @@ import { UserRegistrationInput } from './inputs/register-user.input';
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(SetAuthGuard)
   @Mutation(() => AuthResponse)
   login(
     @Args('userLoginInput') userLoginInput: UserLoginInput,

@@ -1,47 +1,41 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
   Inject,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthError } from '../errors/auth.error';
 import { JWT_CONSTANTS } from '../../jwt/jwt.constants';
-import { DomainError } from '../../common/domain.error';
-import { JwtTypes } from '../../jwt/enums/jwt-types.enum';
 import { JwtService } from '../../jwt/interfaces/jwt-service.interface';
-import { IJwtPayload } from '../../jwt/interfaces/jwt-payload.interface';
+import { AuthService } from '../auth.service';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
+export class SetAuthGuard implements CanActivate {
   constructor(
     @Inject(JWT_CONSTANTS.APPLICATION.SERVICE_TOKEN)
     private jwtService: JwtService,
+    private authService: AuthService,
   ) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
-    const gqlContext = GqlExecutionContext.create(context).getContext();
+    const ctx = GqlExecutionContext.create(context);
+    const args = ctx.getArgs();
+    const { userLoginInput } = args;
 
     try {
-      const accessToken = gqlContext.req.cookies['accessToken'];
-      await accessToken.replace(/^"|"$/g, '');
+      const payload = await this.authService.login({
+        email: userLoginInput.email,
+        password: userLoginInput.password,
+      });
 
-      gqlContext.req.headers.authorization = `Bearer ${accessToken}`;
-
-      const payload: IJwtPayload = await this.jwtService.verify(
-        accessToken,
-        JwtTypes.Access,
-      );
+      const gqlContext = ctx.getContext();
+      gqlContext.req.res.cookie('accessToken', payload.accessToken);
+      gqlContext.req.res.cookie('refreshToken', payload.refreshToken);
 
       return true;
-    } catch (err) {
-      if (err instanceof DomainError) {
-        throw new UnauthorizedException(err.message);
-      }
-
-      throw new BadRequestException(err.message);
+    } catch (error) {
+      return false;
     }
   }
 

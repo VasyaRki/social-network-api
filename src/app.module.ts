@@ -28,6 +28,7 @@ import { IJwtPayload } from './jwt/interfaces/jwt-payload.interface';
         autoSchemaFile: true,
         introspection: true,
         playground: true,
+        'request.credentials': 'include',
         installSubscriptionHandlers: true,
         subscriptions: {
           'subscriptions-transport-ws': {
